@@ -3,6 +3,7 @@
 import { Message } from '@/types'
 import { useEffect, useRef, useState } from 'react'
 import { sendMessage } from './chat.api'
+import { MessageCard } from './message-card'
 
 export function Window() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -27,7 +28,7 @@ export function Window() {
     let base64Image: string | undefined
     if (image) {
       const buffer = await image.arrayBuffer()
-      const rawBase64 = Buffer.from(buffer).toString("base64")
+      const rawBase64 = Buffer.from(buffer).toString('base64')
       base64Image = `data:${image.type};base64,${rawBase64}`
       setLastImageUrl(base64Image)
     } else if (!image && lastImageUrl) {
@@ -82,21 +83,6 @@ export function Window() {
           Send
         </button>
       </form>
-    </div>
-  )
-}
-
-const MessageCard: React.FC<{ msg: Message }> = ({ msg }) => {
-  return (
-    <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-      <div
-        className={`inline-block p-2 rounded-lg max-w-[60%] break-words ${
-          msg.role === 'user' ? 'bg-accent-card-2 text-gray-800' : 'bg-accent-card text-gray-900'
-        }`}
-      >
-        {msg.content && <div>{msg.content}</div>}
-        {msg.image && <img src={msg.image} alt='uploaded' className='mt-2 max-w-full rounded' />}
-      </div>
     </div>
   )
 }
