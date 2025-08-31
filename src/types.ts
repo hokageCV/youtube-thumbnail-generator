@@ -6,6 +6,7 @@ export type User = {
 export type Message = {
   role: "user" | "server"
   content: string
+  image?: string
 }
 
 export type ChatWindowProps = {
