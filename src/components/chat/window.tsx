@@ -8,6 +8,7 @@ export function Window() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [image, setImage] = useState<File | null>(null)
+  const [lastImageUrl, setLastImageUrl] = useState<string | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
@@ -26,8 +27,11 @@ export function Window() {
     let base64Image: string | undefined
     if (image) {
       const buffer = await image.arrayBuffer()
-      const rawBase64 = Buffer.from(buffer).toString('base64')
+      const rawBase64 = Buffer.from(buffer).toString("base64")
       base64Image = `data:${image.type};base64,${rawBase64}`
+      setLastImageUrl(base64Image)
+    } else if (!image && lastImageUrl) {
+      base64Image = lastImageUrl
     }
 
     const userMessage: Message = { role: 'user', content: input, image: base64Image }
@@ -38,6 +42,8 @@ export function Window() {
 
       const serverMessage: Message = { role: 'server', content: reply.text, image: reply.image }
       setMessages((prev) => [...prev, serverMessage])
+
+      if (reply.image) setLastImageUrl(reply.image)
     } catch (err) {
       setMessages((prev) => [...prev, { role: 'server', content: '🚩 Error contacting server' }])
     }
