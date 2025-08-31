@@ -23,7 +23,8 @@ export function Window() {
     let base64Image: string | undefined
     if (image) {
       const buffer = await image.arrayBuffer()
-      base64Image = Buffer.from(buffer).toString('base64')
+      const rawBase64 = Buffer.from(buffer).toString("base64")
+      base64Image = `data:${image.type};base64,${rawBase64}`
     }
 
     const userMessage: Message = { role: 'user', content: input, image: base64Image }
@@ -78,14 +79,7 @@ const MessageCard: React.FC<{ msg: Message }> = ({ msg }) => {
         }`}
       >
         {msg.content && <div>{msg.content}</div>}
-
-        {msg.image && (
-          <img
-            src={`data:image/png;base64,${msg.image}`}
-            alt='uploaded'
-            className='mt-2 max-w-full rounded'
-          />
-        )}
+        {msg.image && <img src={msg.image} alt='uploaded' className='mt-2 max-w-full rounded' />}
       </div>
     </div>
   )
