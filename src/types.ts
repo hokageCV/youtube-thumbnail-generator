@@ -4,7 +4,7 @@ export type User = {
 }
 
 export type Message = {
-  role: "user" | "server"
+  role: "user" | "server" | "loading"
   content: string
   image?: string
 }

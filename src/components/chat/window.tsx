@@ -36,17 +36,22 @@ export function Window() {
     }
 
     const userMessage: Message = { role: 'user', content: input, image: base64Image }
-    setMessages((prev) => [...prev, userMessage])
+    const loadingMessage: Message = { role: 'loading', content: '🤖 Thinking...' }
+    setMessages((prev) => [...prev, userMessage, loadingMessage])
 
     try {
       const reply = await sendMessage(input, base64Image)
 
       const serverMessage: Message = { role: 'server', content: reply.text, image: reply.image }
-      setMessages((prev) => [...prev, serverMessage])
+      setMessages((prev) => prev.map((msg) => (msg.role === 'loading' ? serverMessage : msg)))
 
       if (reply.image) setLastImageUrl(reply.image)
     } catch (err) {
-      setMessages((prev) => [...prev, { role: 'server', content: '🚩 Error contacting server' }])
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.role === 'loading' ? { role: 'server', content: '🚩 Error contacting server' } : msg
+        )
+      )
     }
 
     setInput('')
@@ -69,19 +74,32 @@ export function Window() {
       </div>
 
       <form onSubmit={handleSend} className='p-4 flex gap-2 border-t'>
-        <input
+        <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder='Type a message...'
-          className='flex-1 border rounded-lg px-3 py-2'
+          placeholder={"Type a message.\nAdd details about channel category, target audience, expected induced emotion etc"}
+          rows={3}
+          className='flex-1 resize-none border border-gray-700 rounded-lg px-3 py-2  text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent'
         />
-        <input type='file' accept='image/*' onChange={handleFileChange} ref={fileInputRef} />
-        <button
-          type='submit'
-          className='bg-accent-hover hover:bg-accent text-accent-text px-4 py-2 rounded-lg cursor-pointer'
-        >
-          Send
-        </button>
+        <div className='flex items-center gap-2 mt-2 md:mt-0'>
+          <label className='cursor-pointer px-4 py-2 bg-neutral text-gray-100 rounded-lg hover:bg-accent-hover'>
+            Choose File
+            <input
+              type='file'
+              accept='image/*'
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              className='hidden'
+            />
+          </label>
+
+          <button
+            type='submit'
+            className='bg-accent hover:bg-accent-hover text-accent-text px-4 py-2 rounded-lg cursor-pointer'
+          >
+            Send
+          </button>
+        </div>
       </form>
     </div>
   )
