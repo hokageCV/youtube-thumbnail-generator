@@ -1,13 +1,16 @@
 'use client'
 
 import { Message } from '@/types'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { sendMessage } from './chat.api'
 
 export function Window() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [image, setImage] = useState<File | null>(null)
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files && e.target.files[0]) setImage(e.target.files[0])
@@ -23,7 +26,7 @@ export function Window() {
     let base64Image: string | undefined
     if (image) {
       const buffer = await image.arrayBuffer()
-      const rawBase64 = Buffer.from(buffer).toString("base64")
+      const rawBase64 = Buffer.from(buffer).toString('base64')
       base64Image = `data:${image.type};base64,${rawBase64}`
     }
 
@@ -41,7 +44,12 @@ export function Window() {
 
     setInput('')
     setImage(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
+
+  useEffect(() => {
+    if (messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   return (
     <div className='flex flex-col h-[80vh] min-w-[50%] max-w-4xl mx-auto border border-border rounded-lg shadow mt-5'>
@@ -49,6 +57,8 @@ export function Window() {
         {messages.map((msg, i) => (
           <MessageCard key={i} msg={msg} />
         ))}
+
+        <div ref={messagesEndRef} />
       </div>
 
       <form onSubmit={handleSend} className='p-4 flex gap-2 border-t'>
@@ -58,7 +68,7 @@ export function Window() {
           placeholder='Type a message...'
           className='flex-1 border rounded-lg px-3 py-2'
         />
-        <input type='file' accept='image/*' onChange={handleFileChange} />
+        <input type='file' accept='image/*' onChange={handleFileChange} ref={fileInputRef} />
         <button
           type='submit'
           className='bg-accent-hover hover:bg-accent text-accent-text px-4 py-2 rounded-lg cursor-pointer'
