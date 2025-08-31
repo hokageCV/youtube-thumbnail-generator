@@ -13,19 +13,15 @@ type NanoBananaMessage = {
 
 export async function generateImage(
   processedText: string,
-  base64Image: string
+  base64Image?: string
 ): Promise<{ text: string; imageUrl: string | null }> {
+  const contentArray: any[] = [{ type: "text", text: processedText }]
+
+  if (base64Image) contentArray.push({ type: "image_url", image_url: { url: base64Image } })
+
   const completion = await nanoBanana.chat.completions.create({
     model: process.env.IMAGE_MODEL_NAME!,
-    messages: [
-      {
-        role: "user",
-        content: [
-          { type: "text", text: processedText },
-          { type: "image_url", image_url: { url: base64Image } },
-        ],
-      },
-    ],
+    messages: [{ role: "user", content: contentArray }],
   })
 
   const replyMessage = completion.choices[0].message as unknown as NanoBananaMessage
