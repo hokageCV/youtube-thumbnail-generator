@@ -38,3 +38,32 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ================ Scrollbar ================ */
+
+/* Applies to all scrollbars */
+::-webkit-scrollbar {
+  width: 16px;              /* width of vertical scrollbar */
+  height: 8px;             /* height of horizontal scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: var(--card);  /* track background */
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent); /* thumb color */
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover); /* hover effect */
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--card);
+}
+

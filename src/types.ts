@@ -3,11 +3,9 @@ export type User = {
   password: string
 }
 
-export type Message =  {
-  id: string;
-  text: string;
-  sender: 'user' | 'other';
-  timestamp: Date;
+export type Message = {
+  role: "user" | "server"
+  content: string
 }
 
 export type ChatWindowProps = {
