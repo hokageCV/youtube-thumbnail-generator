@@ -77,13 +77,15 @@ export function Window() {
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={"Type a message.\nAdd details about channel category, target audience, expected induced emotion etc"}
+          placeholder={
+            'Type a message.\nAdd details about channel category, target audience, expected induced emotion etc'
+          }
           rows={3}
           className='flex-1 resize-none border border-gray-700 rounded-lg px-3 py-2  text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent'
         />
         <div className='flex items-center gap-2 mt-2 md:mt-0'>
-          <label className='cursor-pointer px-4 py-2 bg-neutral text-gray-100 rounded-lg hover:bg-accent-hover'>
-            Choose File
+          <label className='cursor-pointer px-4 py-2 bg-neutral text-gray-100 rounded-lg hover:bg-accent-hover max-w-[150px] overflow-hidden truncate'>
+            {image ? image.name : 'Choose File'}
             <input
               type='file'
               accept='image/*'

@@ -1,32 +1,58 @@
-import OpenAI from "openai"
+import { GoogleGenAI } from "@google/genai";
 
-const nanoBanana = new OpenAI({
-  baseURL: process.env.BASE_URL,
+const nanoBanana = new GoogleGenAI({
   apiKey: process.env.NANO_BANANA_KEY,
 })
-
-type NanoBananaMessage = {
-  role: string
-  content?: string
-  images?: { type: string; image_url: { url: string }; index: number }[]
-}
 
 export async function generateImage(
   processedText: string,
   base64Image?: string
 ): Promise<{ text: string; imageUrl: string | null }> {
-  const contentArray: any[] = [{ type: "text", text: processedText }]
+  const contentArray: any[] = [{ text: processedText }]
 
-  if (base64Image) contentArray.push({ type: "image_url", image_url: { url: base64Image } })
+  if (base64Image) {
+    const mimeTypeMatch = base64Image.match(/^data:(image\/\w+);base64,/);
+    const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
+    base64Image = base64Image.replace(/^data:image\/\w+;base64,/, '')
 
-  const completion = await nanoBanana.chat.completions.create({
-    model: process.env.IMAGE_MODEL_NAME!,
-    messages: [{ role: "user", content: contentArray }],
-  })
+    contentArray.push({ inlineData: { mimeType: mimeType, data: base64Image } })
+  }
 
-  const replyMessage = completion.choices[0].message as unknown as NanoBananaMessage
-  const messageText = typeof replyMessage?.content === "string" ? replyMessage.content : ""
-  const imageUrl = replyMessage?.images?.[0]?.image_url?.url ?? null
+  try {
+    const completion = await nanoBanana.models.generateContent({
+      model: process.env.IMAGE_MODEL_NAME!,
+      contents: contentArray,
+    })
 
-  return { text: messageText, imageUrl }
+    let text = '';
+    let imageUrl: string | null = null;
+
+    const parts = completion.candidates?.[0]?.content?.parts || [];
+
+    for (const part of parts) {
+      if (part.text) {
+        text += part.text + ' ';
+      } else if (part.inlineData) {
+        imageUrl = `data:image/png;base64,${part.inlineData.data}`;
+      }
+    }
+
+    return { text: text.trim(), imageUrl: imageUrl }
+  }
+  catch (err: any) {
+
+    if (err.response?.data) {
+      console.log('Error status:', err.response.status);
+      console.log('Error code:', err.response.data.error?.code);
+      console.log('Error message:', err.response.data.error?.message);
+      console.log('Error status:', err.response.data.error?.status);
+    } else if (err.message) {
+      console.log('Error message:', err.message);
+    } else {
+      console.log('Error:', JSON.stringify(err, null, 2));
+    }
+
+    throw err;
+  }
+
 }
